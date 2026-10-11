@@ -68,12 +68,28 @@ impl ArenaAllocator {
     } 
 }
 
+static mut ARENA_BUFFER: [u8; 15000] = [0; 15000];
+
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    let mut buffer: [u8; 15000] = [0; 15000];
-    let mut allocator =  ArenaAllocator::new(&mut buffer);
+    let buffer = unsafe { &mut *core::ptr::addr_of_mut!(ARENA_BUFFER) };
+    let mut allocator =  ArenaAllocator::new(buffer);
 
-    let _my_number = allocator.create::<i32>(42);
+    let my_number = allocator.create::<i32>(42);
+
+    // To prove that this works, we'll use VGA.
+    // If it works, it'll display a bright green 'P', if not, a red 'F'.
+    let vga_buffer = 0xb8000 as *mut u16;
+
+    unsafe {
+        if let Some(number) = my_number {
+            if *number == 42 {
+                *vga_buffer = 0x2F50;
+            } else {
+                *vga_buffer = 0x4F46;
+            }
+        }
+    }
 
     loop {
         unsafe {

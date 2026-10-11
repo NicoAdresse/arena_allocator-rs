@@ -2,6 +2,8 @@
 name = "arena-allocator-rs"
 version = "0.1.0"
 edition = "2024"
+readme = "README.md"
+license = "MIT"
 
 [dependencies]
 bootloader = "0.9"
