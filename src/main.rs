@@ -27,12 +27,13 @@ impl ArenaAllocator {
         let current_ptr = unsafe {
             self.buffer.add(self.offset) as usize
         };
+        
         let aligned_ptr = (current_ptr + (alignment - 1)) & !(alignment - 1);
         let padding = aligned_ptr - current_ptr;
 
-        if size > self.capacity || self.offset > self.capacity - size - padding {
+        if padding > self.capacity - self.offset || size > self.capacity - self.offset - padding {
             return ptr::null_mut();
-        } 
+        }
 
         self.offset += padding + size;
         aligned_ptr as *mut u8
